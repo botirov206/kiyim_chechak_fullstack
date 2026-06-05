@@ -1,0 +1,34 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-brand-emerald: #10b981;
+  --color-brand-emerald-700: #047857;
+  --color-brand-emerald-800: #065f46;
+  --color-brand-ink: #0b1220;
+  --color-brand-gold: #d4af37;
+  --color-brand-gold-700: #b8860b;
+  --shadow-soft: 0 20px 50px -20px rgba(0, 0, 0, 0.55);
+  --font-heading: ui-sans-serif, system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-body: ui-sans-serif, system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+:root {
+  color-scheme: light dark;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  @apply bg-slate-950 text-slate-100 antialiased;
+}
+
+a {
+  @apply text-brand-emerald-700 hover:text-brand-emerald-800;
+}
+
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-brand-emerald-700 focus:ring-offset-2 focus:ring-offset-slate-950;
+}
