@@ -1,6 +1,6 @@
 services:
   backend:
-    image: kurbanbayef/kiyim-chechak-backend:latest
+    image: ${DOCKER_USERNAME}/kiyim-chechak-backend:latest
     container_name: kiyim-chechak-backend
     restart: unless-stopped
     env_file:
@@ -17,7 +17,7 @@ services:
       start_period: 40s
 
   frontend:
-    image: kurbanbayef/kiyim-chechak-frontend:latest
+    image: ${DOCKER_USERNAME}/kiyim-chechak-frontend:latest
     container_name: kiyim-chechak-frontend
     restart: unless-stopped
     ports:
