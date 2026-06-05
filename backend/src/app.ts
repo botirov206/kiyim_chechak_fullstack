@@ -8,6 +8,9 @@ import { notFoundHandler, errorHandler } from "./middleware/errorHandler";
 
 const app = express();
 
+// Required when running behind Nginx on EC2 (X-Forwarded-* headers)
+app.set("trust proxy", 1);
+
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },

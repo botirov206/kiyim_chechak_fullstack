@@ -16,6 +16,20 @@ Monorepo for the **Kiyim Chechak** clothing retail platform: API backend and web
 
 Each package has its own `package.json`; run `npm install` and npm scripts from the corresponding folder.
 
+## AWS EC2 Deploy
+
+### Docker + GitHub Actions (tavsiya etiladi)
+
+`master` ga push qilganda avtomatik:
+1. Docker image build → [Docker Hub](https://hub.docker.com/u/kurbanbayef)
+2. EC2 ga SSH → `docker compose up -d`
+
+**GitHub Secrets sozlash:** [deploy/GITHUB-SECRETS.md](deploy/GITHUB-SECRETS.md)
+
+### Qo'lda (Nginx + systemd)
+
+Full guide: [deploy/EC2-DEPLOY.md](deploy/EC2-DEPLOY.md)
+
 ## Notes
 
 - Do not commit `.env` files; use `.env.example` as templates.

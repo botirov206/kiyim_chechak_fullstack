@@ -9,7 +9,11 @@ type RequestOptions = Omit<RequestInit, 'body'> & {
 }
 
 const buildUrl = (path: string, params?: PaginationParams): string => {
-  const url = new URL(`${env.apiUrl}${path}`)
+  const base = env.apiUrl.startsWith('/')
+    ? new URL(env.apiUrl, window.location.origin)
+    : new URL(env.apiUrl)
+
+  const url = new URL(`${base.pathname.replace(/\/$/, '')}${path}`, base.origin)
 
   if (params) {
     Object.entries(params).forEach(([key, value]) => {

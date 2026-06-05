@@ -1,0 +1,25 @@
+[Unit]
+Description=Kiyim Chechak Backend API
+Documentation=https://github.com/kurbanbayefoo6-dev/kiyim_chechak_fullstack
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/var/www/kiyim-chechak/backend
+EnvironmentFile=/var/www/kiyim-chechak/backend/.env
+ExecStart=/usr/bin/node dist/server.js
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=kiyim-chechak-api
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

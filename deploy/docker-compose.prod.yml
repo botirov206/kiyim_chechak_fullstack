@@ -1,0 +1,33 @@
+services:
+  backend:
+    image: kurbanbayef/kiyim-chechak-backend:latest
+    container_name: kiyim-chechak-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    expose:
+      - "3000"
+    networks:
+      - kiyim-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    image: kurbanbayef/kiyim-chechak-frontend:latest
+    container_name: kiyim-chechak-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - kiyim-net
+
+networks:
+  kiyim-net:
+    driver: bridge
