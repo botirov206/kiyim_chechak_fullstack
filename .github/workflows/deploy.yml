@@ -24,22 +24,20 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build & push backend image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./backend
-          push: true
-          tags: |
-            ${{ env.DOCKER_IMAGE_BACKEND }}:latest
-            ${{ env.DOCKER_IMAGE_BACKEND }}:${{ github.sha }}
+        run: |
+          IMAGE="${{ secrets.DOCKER_USERNAME }}/kiyim-chechak-backend"
+          echo "Building and pushing: ${IMAGE}"
+          docker build -t "${IMAGE}:latest" -t "${IMAGE}:${{ github.sha }}" ./backend
+          docker push "${IMAGE}:latest"
+          docker push "${IMAGE}:${{ github.sha }}"
 
       - name: Build & push frontend image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./frontend
-          push: true
-          tags: |
-            ${{ env.DOCKER_IMAGE_FRONTEND }}:latest
-            ${{ env.DOCKER_IMAGE_FRONTEND }}:${{ github.sha }}
+        run: |
+          IMAGE="${{ secrets.DOCKER_USERNAME }}/kiyim-chechak-frontend"
+          echo "Building and pushing: ${IMAGE}"
+          docker build -t "${IMAGE}:latest" -t "${IMAGE}:${{ github.sha }}" ./frontend
+          docker push "${IMAGE}:latest"
+          docker push "${IMAGE}:${{ github.sha }}"
 
   deploy:
     name: Deploy to EC2 via Docker
