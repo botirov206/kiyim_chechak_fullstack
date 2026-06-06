@@ -94,16 +94,19 @@ jobs:
             LOG_LEVEL=info
             EOF
 
+            # ubuntu user docker guruhiga yangi qo'shilganda SSH sessiyada ruxsat yo'q — sudo ishlatamiz
+            sudo usermod -aG docker ubuntu 2>/dev/null || true
+
             # Login to Docker Hub and pull latest images
-            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+            echo "${{ secrets.DOCKER_PASSWORD }}" | sudo docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
             export DOCKER_USERNAME="${{ secrets.DOCKER_USERNAME }}"
             cd "${DEPLOY_DIR}"
-            docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            sudo docker compose -f docker-compose.prod.yml pull
+            sudo docker compose -f docker-compose.prod.yml up -d --remove-orphans
 
             # Cleanup old images
-            docker image prune -f
+            sudo docker image prune -f
 
             echo "Deploy complete!"
             curl -sf http://localhost/api/health || echo "Health check pending..."
