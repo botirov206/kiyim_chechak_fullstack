@@ -8,7 +8,7 @@ Quyidagi secretlarni qo'shing yoki yangilang. Parollarni repoga commit qilmang.
 
 | Secret nomi | Qanday qiymat | Izoh |
 |-------------|---------------|------|
-| `DOCKER_USERNAME` | Docker Hub **username** (email emas!) | [hub.docker.com](https://hub.docker.com) → profil → username |
+| `DOCKER_USERNAME` | Docker Hub **username** (email emas!) | `kurbanbayef1` |
 | `DOCKER_PASSWORD` | Docker Hub **Access Token** | Account paroli emas — token yarating (quyida) |
 
 ### DOCKER_PASSWORD — Access Token yaratish (majburiy)
@@ -21,7 +21,7 @@ GitHub Actions da oddiy parol ko'pincha ishlamaydi (`unauthorized: incorrect use
 4. **Generate** → tokenni nusxalang (faqat bir marta ko'rinadi!)
 5. GitHub → `DOCKER_PASSWORD` secretni **o'chiring** va **qayta yarating** — tokenni qo'ying
 
-> `DOCKER_USERNAME` = Docker Hub username (masalan `kurbanbayef`). Email ishlamaydi.
+> `DOCKER_USERNAME` = Docker Hub username: **`kurbanbayef1`**. Email ishlamaydi.
 | `DATABASE_URL` | Render PostgreSQL URL | `postgresql://USER:PASS@HOST/DB?schema=public&sslmode=require` |
 | `EC2_HOST` | EC2 public IP | Faqat IP: `13.45.67.89` (`http://` qo'shmang) |
 | `EC2_USER` | SSH foydalanuvchi | Ubuntu uchun: `ubuntu` |
@@ -62,7 +62,7 @@ Render dashboard → PostgreSQL → **External Database URL** dan nusxalang.
 Secretlar to'g'ri bo'lsa, `master` branchga push qilganda GitHub Actions avtomatik:
 
 1. Docker image build qiladi
-2. `kurbanbayef/kiyim-chechak-backend` va `kurbanbayef/kiyim-chechak-frontend` ga push qiladi
+2. `kurbanbayef1/kiyim-chechak-backend` va `kurbanbayef1/kiyim-chechak-frontend` ga push qiladi
 3. EC2 ga SSH orqali ulanib `docker compose up -d` ishga tushiradi
 
 Actions tab: `https://github.com/kurbanbayefoo6-dev/kiyim_chechak_fullstack/actions`
@@ -77,7 +77,7 @@ Bu xato login muvaffaqiyatli, lekin **boshqa namespace** ga push qilishga urinil
 | Token faqat Read | Yangi token — **Read & Write** permission |
 | Image nomi boshqa userga tegishli | Workflow endi `${{ secrets.DOCKER_USERNAME }}/...` ishlatadi — username to'g'ri bo'lishi kerak |
 
-`DOCKER_USERNAME` = Docker Hub dagi aniq username (masalan profilda `kurbanbayef` ko'rinsa, shuni qo'ying).
+`DOCKER_USERNAME` = Docker Hub dagi aniq username: **`kurbanbayef1`**.
 
 Agar xato davom etsa, Docker Hub da qo'lda repository yarating:
 - `https://hub.docker.com/repositories/create` → `kiyim-chechak-backend` (Public)
@@ -99,6 +99,6 @@ Lokal tekshirish (kompyuteringizda):
 
 ```bash
 docker logout
-docker login -u kurbanbayef
+docker login -u kurbanbayef1
 # Password o'rniga Access Token kiriting
 ```

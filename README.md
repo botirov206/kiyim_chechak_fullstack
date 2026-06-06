@@ -21,7 +21,7 @@ Each package has its own `package.json`; run `npm install` and npm scripts from 
 ### Docker + GitHub Actions (tavsiya etiladi)
 
 `master` ga push qilganda avtomatik:
-1. Docker image build → [Docker Hub](https://hub.docker.com/u/kurbanbayef)
+1. Docker image build → [Docker Hub](https://hub.docker.com/u/kurbanbayef1)
 2. EC2 ga SSH → `docker compose up -d`
 
 **GitHub Secrets sozlash:** [deploy/GITHUB-SECRETS.md](deploy/GITHUB-SECRETS.md)
