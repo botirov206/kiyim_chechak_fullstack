@@ -79,6 +79,12 @@ Bu xato login muvaffaqiyatli, lekin **boshqa namespace** ga push qilishga urinil
 
 `DOCKER_USERNAME` = Docker Hub dagi aniq username (masalan profilda `kurbanbayef` ko'rinsa, shuni qo'ying).
 
+Agar xato davom etsa, Docker Hub da qo'lda repository yarating:
+- `https://hub.docker.com/repositories/create` → `kiyim-chechak-backend` (Public)
+- Yana bir marta → `kiyim-chechak-frontend` (Public)
+
+Keyin workflow ni **Re-run** qiling.
+
 ## Docker login xatosi (`unauthorized`)
 
 | Sabab | Yechim |
