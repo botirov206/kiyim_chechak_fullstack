@@ -83,7 +83,7 @@ jobs:
               git pull origin master || git pull origin main
             fi
 
-            # Write backend .env from GitHub secrets
+            # .env — backend uchun + docker-compose image nomlari uchun (DOCKER_USERNAME)
             cat > "${DEPLOY_DIR}/.env" << EOF
             NODE_ENV=production
             PORT=3000
@@ -92,6 +92,7 @@ jobs:
             JWT_EXPIRES_IN=7d
             CORS_ORIGIN=http://${{ secrets.EC2_HOST }}
             LOG_LEVEL=info
+            DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
             EOF
 
             # ubuntu user docker guruhiga yangi qo'shilganda SSH sessiyada ruxsat yo'q — sudo ishlatamiz
@@ -100,10 +101,10 @@ jobs:
             # Login to Docker Hub and pull latest images
             echo "${{ secrets.DOCKER_PASSWORD }}" | sudo docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-            export DOCKER_USERNAME="${{ secrets.DOCKER_USERNAME }}"
             cd "${DEPLOY_DIR}"
-            sudo docker compose -f docker-compose.prod.yml pull
-            sudo docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            # sudo export ni uzatmaydi — DOCKER_USERNAME .env fayldan o'qiladi
+            sudo docker compose --env-file .env -f docker-compose.prod.yml pull
+            sudo docker compose --env-file .env -f docker-compose.prod.yml up -d --remove-orphans
 
             # Cleanup old images
             sudo docker image prune -f
