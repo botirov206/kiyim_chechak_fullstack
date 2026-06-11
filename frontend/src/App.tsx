@@ -1,16 +1,17 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import { ROUTES } from '@/config/routes'
-import { AuthProvider } from '@/contexts/AuthContext'
-import { ProtectedRoute } from '@/components/layout/ProtectedRoute'
-import { AppShell } from '@/components/layout/AppShell'
-import { LoginPage } from '@/pages/LoginPage'
-import { DashboardPage } from '@/pages/DashboardPage'
-import { CustomersPage } from '@/pages/CustomersPage'
-import { InventoryPage } from '@/pages/InventoryPage'
-import { OrdersPage } from '@/pages/OrdersPage'
-import { WarehousePage } from '@/pages/WarehousePage'
-import { ReportsPage } from '@/pages/ReportsPage'
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { ROUTES } from "@/config/routes";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
+import { AppShell } from "@/components/layout/AppShell";
+import { LoginPage } from "@/pages/LoginPage";
+import { DashboardPage } from "@/pages/DashboardPage";
+import { CustomersPage } from "@/pages/CustomersPage";
+import { InventoryPage } from "@/pages/InventoryPage";
+import { OrdersPage } from "@/pages/OrdersPage";
+import { WarehousePage } from "@/pages/WarehousePage";
+import { ReportsPage } from "@/pages/ReportsPage";
 
+// for testing
 export default function App() {
   return (
     <AuthProvider>
@@ -23,8 +24,7 @@ export default function App() {
               <ProtectedRoute>
                 <AppShell />
               </ProtectedRoute>
-            }
-          >
+            }>
             <Route index element={<DashboardPage />} />
             <Route path={ROUTES.dashboard} element={<DashboardPage />} />
             <Route path={ROUTES.customers} element={<CustomersPage />} />
@@ -38,6 +38,5 @@ export default function App() {
         </Routes>
       </BrowserRouter>
     </AuthProvider>
-  )
+  );
 }
-
