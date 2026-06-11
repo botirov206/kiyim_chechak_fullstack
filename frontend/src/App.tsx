@@ -11,7 +11,6 @@ import { OrdersPage } from "@/pages/OrdersPage";
 import { WarehousePage } from "@/pages/WarehousePage";
 import { ReportsPage } from "@/pages/ReportsPage";
 
-// for testing
 export default function App() {
   return (
     <AuthProvider>

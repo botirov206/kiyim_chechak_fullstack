@@ -31,9 +31,9 @@ export function LoginPage() {
       <div className="mx-auto flex min-h-screen max-w-[1100px] flex-col items-center justify-center px-4 py-10">
         <div className="w-full sm:max-w-md">
           <div className="mb-6">
-            <div className="text-3xl font-semibold text-white">Cloud ERP CRM WMS</div>
+            <div className="text-3xl font-semibold text-white">Kiyim Chechak</div>
             <div className="mt-2 text-sm text-white/70">
-              Wholesale operations dashboard for product, orders, and warehouse execution.
+              Wholesale operations dashboard — CI/CD deploy test.
             </div>
           </div>
 

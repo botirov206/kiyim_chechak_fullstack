@@ -81,13 +81,16 @@ jobs:
               sudo apt-get install -y nginx
             fi
 
+            REPO_URL="https://github.com/${{ github.repository }}.git"
+
             # Clone or update repo
             if [ ! -d "${APP_DIR}/.git" ]; then
               sudo mkdir -p "${APP_DIR}"
               sudo chown ubuntu:ubuntu "${APP_DIR}"
-              git clone https://github.com/kurbanbayefoo6-dev/kiyim_chechak_fullstack.git "${APP_DIR}"
+              git clone "${REPO_URL}" "${APP_DIR}"
             else
               cd "${APP_DIR}"
+              git remote set-url origin "${REPO_URL}"
               git pull origin master || git pull origin main
             fi
 
