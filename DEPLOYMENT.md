@@ -178,7 +178,9 @@ Add these secrets to **your fork** → Settings → Secrets → Actions:
 | `EC2_USER` | `ubuntu` | SSH user |
 | `EC2_SSH_KEY` | `.pem` or deploy key | Full private key |
 
-Push to `master` → workflow SSHs in, pulls code, rebuilds, restarts PM2, rebuilds frontend, reloads Nginx.
+Push to `master` → workflow SSHs in, pulls code from **your fork** (`botirov206/kiyim_chechak_fullstack`), rebuilds, restarts PM2, rebuilds frontend, reloads Nginx.
+
+> **Note:** `upstream` (the original repo) being behind your `master` is normal. Deploy always uses **your fork**, not upstream.
 
 Actions: `https://github.com/botirov206/kiyim_chechak_fullstack/actions`
 

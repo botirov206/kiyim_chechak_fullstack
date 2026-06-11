@@ -28,6 +28,13 @@ jobs:
             echo "    Commit: ${{ github.sha }}"
 
             cd "${APP_DIR}"
+
+            if [ ! -d .git ]; then
+              echo "ERROR: ${APP_DIR} is not a git repo. Clone your fork first (see DEPLOYMENT.md)."
+              exit 1
+            fi
+
+            git remote set-url origin "https://github.com/${{ github.repository }}.git"
             git fetch origin
             git reset --hard origin/master || git reset --hard origin/main
 
