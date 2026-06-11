@@ -1,4 +1,4 @@
-name: Build & Deploy to EC2
+name: Deploy
 
 on:
   push:
@@ -6,145 +6,58 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-push:
-    name: Build Docker images & push to Docker Hub
-    runs-on: ubuntu-latest
-    env:
-      DOCKER_IMAGE_BACKEND: ${{ secrets.DOCKER_USERNAME }}/kiyim-chechak-backend
-      DOCKER_IMAGE_FRONTEND: ${{ secrets.DOCKER_USERNAME }}/kiyim-chechak-frontend
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build & push backend image
-        run: |
-          IMAGE="${{ secrets.DOCKER_USERNAME }}/kiyim-chechak-backend"
-          echo "Building and pushing: ${IMAGE}"
-          docker build -t "${IMAGE}:latest" -t "${IMAGE}:${{ github.sha }}" ./backend
-          docker push "${IMAGE}:latest"
-          docker push "${IMAGE}:${{ github.sha }}"
-
-      - name: Build & push frontend image
-        run: |
-          IMAGE="${{ secrets.DOCKER_USERNAME }}/kiyim-chechak-frontend"
-          echo "Building and pushing: ${IMAGE}"
-          docker build -t "${IMAGE}:latest" -t "${IMAGE}:${{ github.sha }}" ./frontend
-          docker push "${IMAGE}:latest"
-          docker push "${IMAGE}:${{ github.sha }}"
-
   deploy:
-    name: Deploy to EC2 via Docker
+    name: Deploy to EC2 (PM2 + Nginx)
     runs-on: ubuntu-latest
-    needs: build-and-push
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Deploy to EC2
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          script_stop: true
           script: |
             set -euo pipefail
 
             APP_DIR="/var/www/kiyim-chechak"
-            DEPLOY_DIR="${APP_DIR}/deploy"
-            APP_DOMAIN="${{ secrets.APP_DOMAIN }}"
-            CORS_ORIGIN="https://${APP_DOMAIN}"
 
-            # Install Docker on first run
-            if ! command -v docker &>/dev/null; then
-              sudo apt-get update -y
-              sudo apt-get install -y ca-certificates curl git
-              sudo install -m 0755 -d /etc/apt/keyrings
-              sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-              sudo chmod a+r /etc/apt/keyrings/docker.asc
-              echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-              sudo apt-get update -y
-              sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-              sudo usermod -aG docker ubuntu
-            fi
+            echo "==> Deploying Kiyim Chechak"
+            echo "    Path:   ${APP_DIR}"
+            echo "    Commit: ${{ github.sha }}"
 
-            # Install host Nginx on first run (Certbot + SSL termination)
-            if ! command -v nginx &>/dev/null; then
-              sudo apt-get update -y
-              sudo apt-get install -y nginx
-            fi
+            cd "${APP_DIR}"
+            git fetch origin
+            git reset --hard origin/master || git reset --hard origin/main
 
-            REPO_URL="https://github.com/${{ github.repository }}.git"
+            echo "==> Building backend..."
+            cd "${APP_DIR}/backend"
+            npm ci --omit=dev
+            npm run build
+            npx prisma migrate deploy
 
-            # Clone or update repo
-            if [ ! -d "${APP_DIR}/.git" ]; then
-              sudo mkdir -p "${APP_DIR}"
-              sudo chown ubuntu:ubuntu "${APP_DIR}"
-              git clone "${REPO_URL}" "${APP_DIR}"
+            echo "==> Starting backend with PM2..."
+            cd "${APP_DIR}"
+            if pm2 describe kiyim-chechak-backend >/dev/null 2>&1; then
+              pm2 restart kiyim-chechak-backend
             else
-              cd "${APP_DIR}"
-              git remote set-url origin "${REPO_URL}"
-              git pull origin master || git pull origin main
+              pm2 start ecosystem.config.cjs
             fi
+            pm2 save
 
-            # Production env for backend container + docker-compose image names
-            {
-              echo "NODE_ENV=production"
-              echo "PORT=3000"
-              echo "DATABASE_URL=${{ secrets.DATABASE_URL }}"
-              echo "JWT_SECRET=${{ secrets.JWT_SECRET }}"
-              echo "JWT_EXPIRES_IN=7d"
-              echo "CORS_ORIGIN=${CORS_ORIGIN}"
-              echo "LOG_LEVEL=info"
-              echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}"
-            } > "${DEPLOY_DIR}/.env"
+            echo "==> Building frontend..."
+            cd "${APP_DIR}/frontend"
+            echo "VITE_API_URL=/api" > .env.production
+            npm ci
+            npm run build
 
-            # Host Nginx — proxy domain -> frontend container on localhost:8080
-            sudo cp "${DEPLOY_DIR}/nginx/kiyim-chechak-docker.conf" /etc/nginx/sites-available/kiyim-chechak
-            sudo ln -sf /etc/nginx/sites-available/kiyim-chechak /etc/nginx/sites-enabled/kiyim-chechak
-            sudo rm -f /etc/nginx/sites-enabled/default
+            echo "==> Reloading Nginx..."
             sudo nginx -t
-            sudo systemctl enable nginx
             sudo systemctl reload nginx
 
-            sudo usermod -aG docker ubuntu 2>/dev/null || true
+            echo "==> Health check..."
+            curl -sf http://127.0.0.1:3000/api/health
+            curl -sf http://127.0.0.1/api/health
 
-            echo "${{ secrets.DOCKER_PASSWORD }}" | sudo docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-            cd "${DEPLOY_DIR}"
-            sudo docker compose --env-file .env -f docker-compose.prod.yml pull
-            sudo docker compose --env-file .env -f docker-compose.prod.yml up -d --remove-orphans
-
-            echo "==> Waiting for backend to become healthy..."
-            for i in $(seq 1 30); do
-              if sudo docker compose --env-file .env -f docker-compose.prod.yml exec -T backend wget -qO- http://localhost:3000/api/health >/dev/null 2>&1; then
-                echo "Backend is healthy."
-                break
-              fi
-              if [ "$i" -eq 30 ]; then
-                echo "ERROR: Backend did not become healthy in time."
-                sudo docker compose --env-file .env -f docker-compose.prod.yml ps
-                sudo docker compose --env-file .env -f docker-compose.prod.yml logs backend --tail 50
-                exit 1
-              fi
-              sleep 2
-            done
-
-            echo "==> Running database migrations..."
-            sudo docker compose --env-file .env -f docker-compose.prod.yml exec -T backend npx prisma migrate deploy
-
-            sudo docker image prune -f
-
-            echo "==> Deploy complete!"
-            echo "Checking local container health..."
-            curl -sf http://127.0.0.1:8080/api/health
-            echo ""
-            echo "Checking public domain health..."
-            curl -sf "https://${APP_DOMAIN}/api/health" || curl -sf "http://${APP_DOMAIN}/api/health"
+            pm2 status
